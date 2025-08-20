@@ -7,7 +7,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import (
-    AppointmentSubmission, GNPCAppointmentLetter, AppointmentDocument,
+    AppointmentSubmission, AppointmentDocument,
     AppointmentStatusHistory, AppointmentEmailLog
 )
 
@@ -93,54 +93,7 @@ class AppointmentDocumentInline(admin.TabularInline):
     readonly_fields = ('uploaded_by',)
 
 
-@admin.register(GNPCAppointmentLetter)
-class GNPCAppointmentLetterAdmin(admin.ModelAdmin):
-    """Admin for GNPC appointment letters."""
-    
-    list_display = (
-        'letter_number', 'nsp_profile', 'department_assigned', 
-        'issue_date', 'is_issued', 'is_acknowledged'
-    )
-    list_filter = ('is_issued', 'is_acknowledged', 'issue_date', 'department_assigned')
-    search_fields = ('letter_number', 'nsp_profile__user__username', 'nsp_profile__nss_id')
-    readonly_fields = ('letter_number', 'created_at', 'updated_at')
-    
-    fieldsets = (
-        ('Letter Information', {
-            'fields': ('letter_number', 'nsp_profile', 'issue_date')
-        }),
-        ('Assignment Details', {
-            'fields': ('reporting_date', 'department_assigned', 'supervisor_assigned')
-        }),
-        ('Service Period', {
-            'fields': ('service_start_date', 'service_end_date')
-        }),
-        ('Letter Content', {
-            'fields': ('letter_content',),
-            'classes': ('collapse',)
-        }),
-        ('Digital Signature', {
-            'fields': ('signed_by', 'signed_at', 'digital_signature'),
-            'classes': ('collapse',)
-        }),
-        ('Documents', {
-            'fields': ('pdf_letter',)
-        }),
-        ('Status', {
-            'fields': ('is_issued', 'is_acknowledged', 'acknowledged_at')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
-    
-    inlines = [AppointmentDocumentInline]
-    
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related(
-            'nsp_profile__user', 'supervisor_assigned', 'signed_by'
-        )
+
 
 
 @admin.register(AppointmentDocument)
@@ -160,7 +113,7 @@ class AppointmentDocumentAdmin(admin.ModelAdmin):
             'fields': ('document_file',)
         }),
         ('Related Objects', {
-            'fields': ('appointment_submission', 'gnpc_letter')
+            'fields': ('appointment_submission',)
         }),
         ('Status', {
             'fields': ('uploaded_by', 'is_required', 'is_verified', 'verified_by', 'verified_at')

@@ -5,7 +5,7 @@ Serializers for the appointments app.
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import (
-    AppointmentSubmission, GNPCAppointmentLetter, AppointmentDocument,
+    AppointmentSubmission, AppointmentDocument,
     AppointmentStatusHistory, AppointmentEmailLog
 )
 
@@ -134,30 +134,7 @@ class AppointmentSubmissionReviewSerializer(serializers.ModelSerializer):
         return value
 
 
-class GNPCAppointmentLetterSerializer(serializers.ModelSerializer):
-    """
-    Serializer for GNPC appointment letters.
-    """
-    
-    nsp_name = serializers.CharField(source='nsp_profile.user.get_full_name', read_only=True)
-    nsp_email = serializers.CharField(source='nsp_profile.user.email', read_only=True)
-    supervisor_name = serializers.CharField(source='supervisor_assigned.get_full_name', read_only=True)
-    signed_by_name = serializers.CharField(source='signed_by.get_full_name', read_only=True)
-    
-    class Meta:
-        model = GNPCAppointmentLetter
-        fields = [
-            'id', 'letter_number', 'nsp_profile', 'nsp_name', 'nsp_email',
-            'issue_date', 'reporting_date', 'department_assigned',
-            'supervisor_assigned', 'supervisor_name', 'service_start_date',
-            'service_end_date', 'letter_content', 'signed_by', 'signed_by_name',
-            'signed_at', 'pdf_letter', 'is_issued', 'is_acknowledged',
-            'acknowledged_at', 'created_at'
-        ]
-        read_only_fields = [
-            'id', 'letter_number', 'signed_at', 'is_acknowledged',
-            'acknowledged_at', 'created_at'
-        ]
+
 
 
 class AppointmentDocumentSerializer(serializers.ModelSerializer):
