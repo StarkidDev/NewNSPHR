@@ -133,88 +133,6 @@ class AppointmentSubmission(TimeStampedModel):
         self.save()
 
 
-class GNPCAppointmentLetter(TimeStampedModel):
-    """
-    Model for official GNPC appointment letters generated after approval.
-    """
-    
-    nsp_profile = models.OneToOneField(
-        'accounts.NSPProfile',
-        on_delete=models.CASCADE,
-        related_name='gnpc_appointment_letter'
-    )
-    
-    # Letter Details
-    letter_number = models.CharField(max_length=50, unique=True, blank=True)
-    issue_date = models.DateField()
-    reporting_date = models.DateField()
-    department_assigned = models.CharField(max_length=100)
-    supervisor_assigned = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='assigned_appointment_letters',
-        limit_choices_to={'user_type': 'SUPERVISOR'}
-    )
-    
-    # Service Period
-    service_start_date = models.DateField()
-    service_end_date = models.DateField()
-    
-    # Letter Content
-    letter_content = models.TextField(help_text="Generated letter content")
-    
-    # Digital Signature
-    signed_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='signed_appointment_letters',
-        limit_choices_to={'user_type': 'HR'}
-    )
-    signed_at = models.DateTimeField(blank=True, null=True)
-    digital_signature = models.TextField(blank=True)
-    
-    # Document Files
-    pdf_letter = models.FileField(upload_to='gnpc_letters/%Y/', blank=True, null=True)
-    
-    # Status
-    is_issued = models.BooleanField(default=False)
-    is_acknowledged = models.BooleanField(default=False)
-    acknowledged_at = models.DateTimeField(blank=True, null=True)
-    
-    class Meta:
-        verbose_name = "GNPC Appointment Letter"
-        verbose_name_plural = "GNPC Appointment Letters"
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"Letter {self.letter_number} - {self.nsp_profile.user.get_full_name()}"
-    
-    def save(self, *args, **kwargs):
-        if not self.letter_number:
-            year = timezone.now().year
-            count = GNPCAppointmentLetter.objects.filter(
-                created_at__year=year
-            ).count() + 1
-            self.letter_number = f"GNPC/NSP/{year}/{count:04d}"
-        super().save(*args, **kwargs)
-    
-    def issue_letter(self, signed_by):
-        """Issue the appointment letter."""
-        self.is_issued = True
-        self.signed_by = signed_by
-        self.signed_at = timezone.now()
-        self.save()
-    
-    def acknowledge_letter(self):
-        """Mark letter as acknowledged by NSP."""
-        self.is_acknowledged = True
-        self.acknowledged_at = timezone.now()
-        self.save()
-
 
 class AppointmentDocument(TimeStampedModel):
     """
@@ -237,13 +155,7 @@ class AppointmentDocument(TimeStampedModel):
         null=True
     )
     
-    gnpc_letter = models.ForeignKey(
-        GNPCAppointmentLetter,
-        on_delete=models.CASCADE,
-        related_name='additional_documents',
-        blank=True,
-        null=True
-    )
+
     
     document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES)
     title = models.CharField(max_length=200)
