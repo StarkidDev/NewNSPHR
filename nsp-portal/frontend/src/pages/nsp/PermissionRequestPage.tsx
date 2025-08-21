@@ -27,6 +27,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  FormControlLabel,
+  Checkbox,
   Divider,
 } from '@mui/material';
 import {
@@ -50,8 +52,8 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 const schema = yup.object({
   permission_type: yup.string().required('Permission type is required'),
   start_date: yup.date().required('Start date is required'),
-  end_date: yup.date().required('End date is required').min(yup.ref('start_date'), 'End date must be after start date'),
-  reason: yup.string().required('Reason is required').min(10, 'Please provide a detailed reason'),
+  end_date: yup.date().required('End date is required'),
+  reason: yup.string().required('Reason is required').min(10, 'Please provide detailed reason'),
   contact_phone: yup.string().required('Contact phone is required'),
   contact_email: yup.string().email('Invalid email').required('Contact email is required'),
   residential_address: yup.string().required('Residential address is required'),
@@ -90,11 +92,9 @@ const PermissionRequestPage: React.FC = () => {
   const endDate = watch('end_date');
   const watchFile = watch('supporting_document');
 
-  // Mock data for existing requests
   const [requests] = useState([
     {
       id: 1,
-      permission_type: 'SICK_LEAVE',
       permission_type_display: 'Sick Leave',
       start_date: '2024-01-20',
       end_date: '2024-01-22',
@@ -111,7 +111,6 @@ const PermissionRequestPage: React.FC = () => {
     },
     {
       id: 2,
-      permission_type: 'PERSONAL_LEAVE',
       permission_type_display: 'Personal Leave',
       start_date: '2024-02-05',
       end_date: '2024-02-05',
@@ -139,10 +138,8 @@ const PermissionRequestPage: React.FC = () => {
     setError('');
 
     try {
-      // In real app, submit to API
+      // Mock API call
       console.log('Submitting permission request:', data);
-      
-      // Mock API delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       setSubmitSuccess(true);
@@ -202,7 +199,7 @@ const PermissionRequestPage: React.FC = () => {
           </Button>
         </Box>
 
-        {/* Permission Request Form */}
+        {/* COMPLETE Permission Request Form */}
         {showForm && (
           <Card sx={{ mb: 4 }}>
             <CardContent>
@@ -221,7 +218,6 @@ const PermissionRequestPage: React.FC = () => {
 
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={3}>
-                  {/* Permission Type */}
                   <Grid item xs={12} md={6}>
                     <Controller
                       name="permission_type"
@@ -249,7 +245,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Days Calculation Display */}
                   {startDate && endDate && (
                     <Grid item xs={12} md={6}>
                       <Alert severity="info">
@@ -260,7 +255,6 @@ const PermissionRequestPage: React.FC = () => {
                     </Grid>
                   )}
 
-                  {/* Start Date */}
                   <Grid item xs={12} md={6}>
                     <Controller
                       name="start_date"
@@ -282,7 +276,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* End Date */}
                   <Grid item xs={12} md={6}>
                     <Controller
                       name="end_date"
@@ -304,7 +297,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Reason */}
                   <Grid item xs={12}>
                     <Controller
                       name="reason"
@@ -324,7 +316,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Contact Information */}
                   <Grid item xs={12} md={6}>
                     <Controller
                       name="contact_phone"
@@ -360,7 +351,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Residential Address */}
                   <Grid item xs={12}>
                     <Controller
                       name="residential_address"
@@ -380,7 +370,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Supporting Document */}
                   <Grid item xs={12}>
                     <Controller
                       name="supporting_document"
@@ -418,7 +407,6 @@ const PermissionRequestPage: React.FC = () => {
                     />
                   </Grid>
 
-                  {/* Submit Button */}
                   <Grid item xs={12}>
                     <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                       <Button
@@ -446,7 +434,7 @@ const PermissionRequestPage: React.FC = () => {
           </Card>
         )}
 
-        {/* Existing Requests */}
+        {/* Existing Requests Table */}
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>
@@ -522,14 +510,6 @@ const PermissionRequestPage: React.FC = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
-            {requests.length === 0 && (
-              <Box sx={{ textAlign: 'center', py: 4 }}>
-                <Typography variant="body1" color="text.secondary">
-                  No permission requests found. Click "New Permission Request" to submit your first request.
-                </Typography>
-              </Box>
-            )}
           </CardContent>
         </Card>
 
@@ -561,14 +541,6 @@ const PermissionRequestPage: React.FC = () => {
                 <Grid item xs={12} sm={6}>
                   <Typography variant="body2" color="text.secondary">End Date</Typography>
                   <Typography variant="body1">{new Date(selectedRequest.end_date).toLocaleDateString()}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary">Days Requested</Typography>
-                  <Typography variant="body1">{selectedRequest.days_requested}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="body2" color="text.secondary">Days Granted</Typography>
-                  <Typography variant="body1">{selectedRequest.days_granted || 'Pending'}</Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="body2" color="text.secondary">Reason</Typography>
